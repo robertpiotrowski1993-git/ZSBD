@@ -1,0 +1,160 @@
+-- Zad 1
+--CREATE VIEW v_wysokie_pensje AS
+--SELECT *
+--FROM employees
+--WHERE salary > 6000;
+--
+--SELECT * FROM v_wysokie_pensje;
+
+-- Zad 2
+--CREATE OR REPLACE VIEW v_wysokie_pensje AS
+--SELECT *
+--FROM employees
+--WHERE salary > 12000;
+--
+--SELECT * FROM v_wysokie_pensje;
+
+-- Zad 3
+--DROP VIEW v_wysokie_pensje;
+
+-- Zad 4
+--CREATE OR REPLACE VIEW v_finance_pracownicy AS
+--SELECT employee_id,
+--       last_name,
+--       first_name
+--FROM employees
+--WHERE department_id = (
+--    SELECT department_id
+--    FROM departments
+--    WHERE department_name = 'Finance'
+--);
+--
+--SELECT * FROM v_finance_pracownicy;
+
+-- Zad 5
+--CREATE OR REPLACE VIEW v_zarobki_5000_12000 AS
+--SELECT employee_id,
+--       last_name,
+--       first_name,
+--       salary,
+--       job_id,
+--       email,
+--       hire_date
+--FROM employees
+--WHERE salary BETWEEN 5000 AND 12000;
+--
+--SELECT * FROM v_zarobki_5000_12000;
+
+-- Zad 6.1 (dodanie pracownika)
+-- nie można dodać - ORA-01400: nie można wstawić wartości NULL do ("NSTMSU_PIOTROWSKIR"."EMPLOYEES"."EMAIL")
+--INSERT INTO v_finance_pracownicy (employee_id, last_name, first_name)
+--VALUES (1000, 'Testowy', 'Jan');
+
+-- można dodać
+--INSERT INTO v_zarobki_5000_12000 (employee_id, last_name, first_name, salary, job_id, email, hire_date)
+--VALUES (1000, 'Testowy', 'Jan', 7000, 'IT_PROG', 'JTESTOWY', SYSDATE);
+--
+--SELECT * FROM employees WHERE employee_id = 1000;
+
+-- Zad 6.2 (edycja pracownika) TAK
+--UPDATE v_finance_pracownicy
+--SET last_name = last_name
+--WHERE employee_id = 113;
+--
+--UPDATE v_zarobki_5000_12000
+--SET salary = 7500
+--WHERE employee_id = 1000;
+--
+--SELECT * FROM employees WHERE employee_id = 1000;
+
+-- Zad 6.3 (usunięcie pracownika)
+-- TAK: 
+--DELETE FROM v_finance_pracownicy
+--WHERE employee_id = 113;
+--
+--ROLLBACK;
+--
+--DELETE FROM v_zarobki_5000_12000
+--WHERE employee_id = 113;
+--
+--COMMIT;
+
+-- Zad 7
+--CREATE OR REPLACE VIEW v_dzialy_statystyki AS
+--SELECT d.department_id,
+--       d.department_name,
+--       COUNT(e.employee_id) AS liczba_pracownikow,
+--       ROUND(AVG(e.salary), 2) AS srednia_pensja,
+--       MAX(e.salary) AS najwyzsza_pensja
+--FROM departments d
+--JOIN employees e ON e.department_id = d.department_id
+--GROUP BY d.department_id, d.department_name
+--HAVING COUNT(e.employee_id) >= 4;
+--
+--SELECT * FROM v_dzialy_statystyki;
+
+-- Zad 7.1
+-- błąd SQL Error: ORA-01779: nie można modyfikować kolumny, która odwzorowuje się do tabeli nie zachowującej kluczy
+--INSERT INTO v_dzialy_statystyki (department_id, department_name, liczba_pracownikow, srednia_pensja, najwyzsza_pensja)
+--VALUES (999, 'Testowy', 4, 5000, 6000);
+
+-- Zad 8 
+--CREATE OR REPLACE VIEW v_zarobki_check AS
+--SELECT employee_id,
+--       last_name,
+--       first_name,
+--       salary,
+--       job_id,
+--       email,
+--       hire_date
+--FROM employees
+--WHERE salary BETWEEN 5000 AND 12000
+--WITH CHECK OPTION CONSTRAINT v_zarobki_check_ck;
+--
+--SELECT * FROM v_zarobki_check;
+
+-- Zad 8.1.1 TAK
+--INSERT INTO v_zarobki_check (employee_id, last_name, first_name, salary, job_id, email, hire_date)
+--VALUES (1001, 'Testowa', 'Anna', 8000, 'IT_PROG', 'ATESTOWA', SYSDATE);
+
+-- Zad 8.1.2 NIE : SQL Error: ORA-01402: naruszenie klauzuli WHERE dla perspektywy z WITH CHECK OPTION
+--INSERT INTO v_zarobki_check (employee_id, last_name, first_name, salary, job_id, email, hire_date)
+--VALUES (1002, 'Testowy', 'Piotr', 15000, 'IT_PROG', 'PTESTOWY', SYSDATE);
+--
+--SELECT * FROM employees WHERE employee_id IN (1001, 1002);
+--
+--DELETE FROM v_zarobki_check
+--WHERE employee_id = 1001;
+--
+--COMMIT;
+
+-- Zad 9
+--CREATE MATERIALIZED VIEW v_managerowie
+--BUILD IMMEDIATE
+--REFRESH COMPLETE ON DEMAND
+--AS
+--SELECT e.employee_id,
+--       e.first_name,
+--       e.last_name,
+--       d.department_name
+--FROM employees e
+--JOIN departments d ON e.department_id = d.department_id
+--WHERE EXISTS (
+--    SELECT 1
+--    FROM employees p
+--    WHERE p.manager_id = e.employee_id
+--);
+--
+--SELECT * FROM v_managerowie;
+
+-- Zad 10
+--CREATE OR REPLACE VIEW v_najlepiej_oplacani AS
+--SELECT employee_id,
+--       first_name,
+--       last_name,
+--       salary
+--FROM employees
+--ORDER BY salary DESC
+--FETCH FIRST 10 ROWS ONLY;
+--
+--SELECT * FROM v_najlepiej_oplacani;
