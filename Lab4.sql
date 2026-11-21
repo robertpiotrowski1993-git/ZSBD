@@ -1,0 +1,133 @@
+-- Zad 1
+--SELECT employee_id,
+--       first_name,
+--       last_name,
+--       salary,
+--       RANK() OVER (ORDER BY salary DESC) AS ranking_pensji
+--FROM employees
+--ORDER BY ranking_pensji;
+
+-- Zad 2
+--SELECT employee_id,
+--       first_name,
+--       last_name,
+--       salary,
+--       SUM(salary) OVER () AS suma_pensji
+--FROM employees;
+
+-- Zad 3
+--SELECT e.last_name,
+--       p.product_name,
+--       s.quantity * s.price AS wartosc_sprzedazy,
+--       SUM(s.quantity * s.price) OVER (PARTITION BY s.employee_id) AS skumulowana_wartosc,
+--       RANK() OVER (ORDER BY s.quantity * s.price DESC) AS ranking_sprzedazy
+--FROM sales s
+--JOIN employees e ON e.employee_id = s.employee_id
+--JOIN products p ON p.product_id = s.product_id
+--ORDER BY e.last_name, ranking_sprzedazy;
+
+-- Zad 4
+--SELECT e.last_name,
+--       p.product_name,
+--       s.sale_date,
+--       s.price,
+--       COUNT(*) OVER (PARTITION BY s.product_id, TRUNC(s.sale_date)) AS liczba_transakcji,
+--       SUM(s.quantity * s.price) OVER (PARTITION BY s.product_id, TRUNC(s.sale_date)) AS suma_dnia,
+--       LAG(s.price) OVER (PARTITION BY s.product_id ORDER BY s.sale_date, s.sale_id) AS poprzednia_cena,
+--       LEAD(s.price) OVER (PARTITION BY s.product_id ORDER BY s.sale_date, s.sale_id) AS nastepna_cena
+--FROM sales s
+--JOIN employees e ON e.employee_id = s.employee_id
+--JOIN products p ON p.product_id = s.product_id
+--ORDER BY p.product_name, s.sale_date, s.sale_id;
+
+-- Zad 5
+--SELECT p.product_name,
+--       s.sale_date,
+--       s.price,
+--       SUM(s.quantity * s.price) OVER (PARTITION BY s.product_id, TRUNC(s.sale_date, 'MM')) AS suma_miesiac,
+--       SUM(s.quantity * s.price) OVER (PARTITION BY s.product_id, TRUNC(s.sale_date, 'MM')
+--                                       ORDER BY s.sale_date, s.sale_id) AS suma_rosnaca_miesiac
+--FROM sales s
+--JOIN products p ON p.product_id = s.product_id
+--ORDER BY p.product_name, s.sale_date, s.sale_id;
+
+-- Zad 6
+--SELECT product_name,
+--       product_category,
+--       dzien,
+--       cena_2022,
+--       cena_2023,
+--       cena_2023 - cena_2022 AS roznica
+--FROM (
+--    SELECT p.product_name,
+--           p.product_category,
+--           TO_CHAR(s.sale_date, 'MM-DD') AS dzien,
+--           EXTRACT(YEAR FROM s.sale_date) AS rok,
+--           LAG(s.price) OVER (PARTITION BY s.product_id, TO_CHAR(s.sale_date, 'MM-DD')
+--                              ORDER BY s.sale_date) AS cena_2022,
+--           s.price AS cena_2023
+--    FROM sales s
+--    JOIN products p ON p.product_id = s.product_id
+--    WHERE EXTRACT(YEAR FROM s.sale_date) IN (2022, 2023)
+--)
+--WHERE rok = 2023
+--ORDER BY dzien, product_name;
+
+-- Zad 7
+--SELECT p.product_category,
+--       p.product_name,
+--       s.price,
+--       MIN(s.price) OVER (PARTITION BY p.product_category) AS min_cena_kategorii,
+--       MAX(s.price) OVER (PARTITION BY p.product_category) AS max_cena_kategorii,
+--       MAX(s.price) OVER (PARTITION BY p.product_category)
+--           - MIN(s.price) OVER (PARTITION BY p.product_category) AS roznica
+--FROM sales s
+--JOIN products p ON p.product_id = s.product_id
+--ORDER BY p.product_category, p.product_name;
+
+-- Zad 8
+--SELECT p.product_name,
+--       s.sale_date,
+--       s.price,
+--       ROUND(AVG(s.price) OVER (PARTITION BY s.product_id
+--                                ORDER BY s.sale_date, s.sale_id
+--                                ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING), 2) AS srednia_kroczaca
+--FROM sales s
+--JOIN products p ON p.product_id = s.product_id
+--ORDER BY p.product_name, s.sale_date, s.sale_id;
+
+-- Zad 9
+--SELECT p.product_name,
+--       p.product_category,
+--       s.price,
+--       RANK() OVER (PARTITION BY p.product_category ORDER BY s.price DESC) AS ranking_cen,
+--       ROW_NUMBER() OVER (PARTITION BY p.product_category ORDER BY s.price DESC) AS numer_wiersza,
+--       DENSE_RANK() OVER (PARTITION BY p.product_category ORDER BY s.price DESC) AS ranking_gesty
+--FROM sales s
+--JOIN products p ON p.product_id = s.product_id
+--ORDER BY p.product_category, numer_wiersza;
+
+-- Zad 10
+--SELECT e.last_name,
+--       p.product_name,
+--       s.sale_date,
+--       s.quantity * s.price AS wartosc_zamowienia,
+--       SUM(s.quantity * s.price) OVER (PARTITION BY s.employee_id
+--                                       ORDER BY s.sale_date, s.sale_id) AS wartosc_rosnaca,
+--       RANK() OVER (ORDER BY s.quantity * s.price DESC) AS ranking_globalny
+--FROM sales s
+--JOIN employees e ON e.employee_id = s.employee_id
+--JOIN products p ON p.product_id = s.product_id
+--ORDER BY e.last_name, s.sale_date, s.sale_id;
+
+-- Zad 11
+--SELECT e.first_name,
+--       e.last_name,
+--       j.job_title
+--FROM employees e
+--JOIN jobs j ON j.job_id = e.job_id
+--WHERE e.employee_id IN (
+--    SELECT employee_id
+--    FROM sales
+--)
+--ORDER BY e.last_name;
